@@ -1,0 +1,10 @@
+target
+.git
+.gitignore
+.slim
+*.sqlite
+*.ndjson
+*.log
+README.md
+AGENTS.md
+docker-bake.hcl

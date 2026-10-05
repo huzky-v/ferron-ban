@@ -1,0 +1,20 @@
+[package]
+name = "abuse-core"
+version = "0.1.0"
+description = "Ferron-independent abuse protection domain core"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+base64 = "0.22"
+libc = "0.2"
+regex = "1.11"
+rusqlite = { version = "0.40", features = ["bundled"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+serde_yaml = "0.9.34"
+thiserror = "2.0"
+
+[dev-dependencies]
+tempfile = "3.14"

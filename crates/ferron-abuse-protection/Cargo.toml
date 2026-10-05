@@ -1,0 +1,34 @@
+[package]
+name = "ferron-abuse-protection"
+version = "0.1.0"
+description = "Ferron 3 adapter for the abuse-core protection engine"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+abuse-core = { path = "../abuse-core" }
+async-trait = "0.1"
+bytes = "1"
+chrono = "0.4"
+http = "1"
+http-body-util = "0.1.3"
+libc = "0.2"
+reqwest = { version = "=0.12.24", default-features = false, features = ["blocking", "rustls-tls-webpki-roots"] }
+tempfile = "3.14"
+thiserror = "2"
+zip = { version = "2.4", default-features = false, features = ["deflate"] }
+tokio = { version = "1", features = ["rt", "time", "macros"] }
+typemap_rev = "0.4"
+rusqlite = { version = "0.40", features = ["bundled"] }
+
+ferron-core = { git = "https://github.com/ferronweb/ferron.git", rev = "4c332d71545bea7076efc6d93ce4b42620475c43", version = "3.0.0-rc.6" }
+ferron-http = { git = "https://github.com/ferronweb/ferron.git", rev = "4c332d71545bea7076efc6d93ce4b42620475c43", version = "3.0.0-rc.6" }
+ferron-observability = { git = "https://github.com/ferronweb/ferron.git", rev = "4c332d71545bea7076efc6d93ce4b42620475c43", version = "3.0.0-rc.6" }
+
+[dev-dependencies]
+tempfile = "3.14"
+rustc-hash = "2"
+rcgen = "0.14"
+rustls = { version = "0.23", features = ["ring"] }
+rustls-pki-types = "1"

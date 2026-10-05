@@ -1,0 +1,14 @@
+.slim/deepwork/
+target/
+zip/
+*.sqlite
+*.ndjson
+.DS_Store
+examples/*
+!examples/docker-compose/
+examples/docker-compose/*
+!examples/docker-compose/docker-compose.yml
+!examples/docker-compose/docker-compose.bundle.yml
+!examples/docker-compose/ferron.conf
+!examples/docker-compose/ferron-bundle.conf
+!examples/docker-compose/README.md

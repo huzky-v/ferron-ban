@@ -1,0 +1,22 @@
+[package]
+name = "ferron-abuse-bin"
+version = "0.1.0"
+description = "Custom Ferron entrypoint with abuse protection"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[[bin]]
+name = "ferron"
+path = "src/main.rs"
+
+[dependencies]
+ferron-abuse-protection = { path = "../ferron-abuse-protection" }
+ferron-entrypoint = { git = "https://github.com/ferronweb/ferron.git", rev = "4c332d71545bea7076efc6d93ce4b42620475c43", version = "3.0.0-rc.6", features = ["profile-default"] }
+
+[dev-dependencies]
+abuse-core = { path = "../abuse-core" }
+libc = "0.2"
+rusqlite = { version = "0.40", features = ["bundled"] }
+serde_json = "1"
+tempfile = "3.14"

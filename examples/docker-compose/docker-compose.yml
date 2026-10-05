@@ -1,0 +1,79 @@
+# Legacy DB + template directory example: put ferron in front of a site under
+# Docker Compose. For the single-ZIP alternative, see README.md and run only
+# docker-compose.bundle.yml (do not combine the two Compose files).
+#
+# ferron is a full Ferron server (with the abuse-protection module linked
+# in), so it is the *edge* in this stack: only publish its ports, keep the app
+# container on the internal network, and reverse-proxy to it with `proxy { upstream ... }`.
+#
+# Usage:
+#   docker build -t ferron:alpine --target runtime-alpine .
+#   docker build -t ferron:init   --target definitions-init .
+#   cd examples/docker-compose
+#   docker compose run --rm ferron-defs-init
+#   docker compose run --rm --entrypoint sqlite3 ferron-defs-init \
+#     /var/lib/ferron/attack-definitions.sqlite \
+#     "INSERT INTO attack_definitions (name,field,matcher,pattern,attack_type,created_at,updated_at) VALUES ('id-leak-dotenv','path','exact','/.env','id_leak','now','now');"
+#   mkdir -p honeypot-responses
+#   cp ../../honeypot-responses/id-leak-dotenv.yaml honeypot-responses/
+#   docker compose up -d
+# The init job only creates the schema; an empty database has no detection rules.
+# Provision your DB rows and matching templates before starting Ferron. The
+# commands above illustrate one rule; customize or omit it if already present.
+# SQLite definitions are authoritative: provide exactly one YAML file for each
+# enabled id_leak definition in the database, and no extra YAML files.
+# Keep this directory outside the image; update DB rows/templates and restart
+# Ferron to apply changes without rebuilding the image.
+#
+# Override image names/tags with a .env file or environment:
+#   FERRON_IMAGE=ghcr.io/you/ferron:3.0.0-rc.6-alpine
+#   FERRON_INIT_IMAGE=ghcr.io/you/ferron:3.0.0-rc.6-init
+
+name: ferron
+
+services:
+  # One-shot job: create/validate the schema in a shared volume, without
+  # inserting or modifying any definition rows. Populate the DB separately
+  # before `up`; running this job alone cannot configure honeypot rules. It
+  # runs as root to write to a newly created named volume.
+  ferron-defs-init:
+    image: ${FERRON_INIT_IMAGE:-ferron:init}
+    command: ["/var/lib/ferron/attack-definitions.sqlite"]
+    volumes:
+      - ferron-defs:/var/lib/ferron
+    restart: "no"
+
+  ferron:
+    image: ${FERRON_IMAGE:-ferron:alpine}
+    depends_on:
+      ferron-defs-init:
+        condition: service_completed_successfully
+      app:
+        condition: service_started
+    ports:
+      # container listens on 8080 because the nonroot user cannot bind <1024
+      - "80:8080"
+      # Enable together with the TLS/ACME block in ferron.conf:
+      # - "443:8443"
+    volumes:
+      - ferron-defs:/var/lib/ferron
+      - ferron-logs:/var/log/ferron
+      - ./ferron.conf:/etc/ferron/ferron.conf:ro
+      - ./honeypot-responses:/etc/ferron/honeypot-responses:ro
+      # - ./wwwroot:/var/www/static:ro          # static.example.com
+      # - ./certs:/etc/ferron/certs:ro          # manual TLS
+      # - ferron-acme:/var/cache/ferron-acme    # ACME certificate cache
+    restart: unless-stopped
+
+  # Your application. It must NOT publish ports; Ferron reaches it over the
+  # compose network by service name. Replace with your real workload image.
+  app:
+    image: nginx:1.27-alpine
+    expose:
+      - "80"
+    restart: unless-stopped
+
+volumes:
+  ferron-defs:
+  ferron-logs:
+  # ferron-acme:

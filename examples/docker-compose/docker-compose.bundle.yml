@@ -1,0 +1,32 @@
+# Standalone ZIP-bundle alternative to docker-compose.yml. Do not combine files.
+# Prepare ./abuse-bundle.zip before starting; see README.md.
+name: ferron
+
+services:
+  ferron:
+    image: ${FERRON_IMAGE:-ferron:alpine}
+    depends_on:
+      app:
+        condition: service_started
+    ports:
+      - "80:8080"
+      # Enable together with the TLS/ACME block in ferron-bundle.conf:
+      # - "443:8443"
+    volumes:
+      - ./abuse-bundle.zip:/var/lib/ferron/abuse-bundle.zip:ro
+      - ferron-logs:/var/log/ferron
+      - ./ferron-bundle.conf:/etc/ferron/ferron.conf:ro
+      # - ./wwwroot:/var/www/static:ro
+      # - ./certs:/etc/ferron/certs:ro
+      # - ferron-acme:/var/cache/ferron-acme
+    restart: unless-stopped
+
+  app:
+    image: nginx:1.27-alpine
+    expose:
+      - "80"
+    restart: unless-stopped
+
+volumes:
+  ferron-logs:
+  # ferron-acme:
