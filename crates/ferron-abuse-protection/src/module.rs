@@ -198,6 +198,21 @@ pub struct FerronAbuseProtectionModuleLoader {
 }
 
 impl ModuleLoader for FerronAbuseProtectionModuleLoader {
+    fn register_configuration_adapters(
+        &mut self,
+        registry: &mut std::collections::HashMap<
+            &'static str,
+            Box<dyn ferron_core::config::adapter::ConfigurationAdapter>,
+        >,
+    ) {
+        for (name, adapter) in std::mem::take(registry) {
+            registry.insert(
+                name,
+                Box::new(AbuseCatchAllConfigurationAdapter { inner: adapter }),
+            );
+        }
+    }
+
     fn register_global_configuration_validators(
         &mut self,
         registry: &mut Vec<Box<dyn ferron_core::config::validator::ConfigurationValidator>>,
@@ -514,6 +529,25 @@ impl ModuleLoader for FerronAbuseProtectionModuleLoader {
             state: Arc::clone(&self.state),
         }));
         Ok(())
+    }
+}
+
+struct AbuseCatchAllConfigurationAdapter {
+    inner: Box<dyn ferron_core::config::adapter::ConfigurationAdapter>,
+}
+
+impl ferron_core::config::adapter::ConfigurationAdapter for AbuseCatchAllConfigurationAdapter {
+    fn adapt(
+        &self,
+        params: &std::collections::HashMap<String, String>,
+    ) -> ferron_core::config::adapter::AdaptResult {
+        let (mut config, watcher, metadata) = self.inner.adapt(params)?;
+        crate::config_adapter::add_abuse_catch_all(&mut config);
+        Ok((config, watcher, metadata))
+    }
+
+    fn file_extension(&self) -> Vec<&'static str> {
+        self.inner.file_extension()
     }
 }
 

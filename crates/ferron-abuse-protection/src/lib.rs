@@ -1,6 +1,7 @@
 mod bundle_source;
 mod cloudflare;
 mod config;
+mod config_adapter;
 mod definition_source;
 mod ipban;
 mod matched_log;

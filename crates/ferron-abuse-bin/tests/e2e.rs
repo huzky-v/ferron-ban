@@ -117,6 +117,60 @@ fn live_wordpress_site_and_no_log_paths_preserve_bans_and_logs() {
     assert!(!audit.contains("/favicon.ico"), "{audit}");
 }
 
+#[test]
+fn live_global_policy_catches_unconfigured_ip_host_requests() {
+    let _server_guard = LIVE_SERVER_LOCK.lock().unwrap();
+    let temp = tempfile::tempdir().unwrap();
+    let upstream = Upstream::start();
+    let db = temp.path().join("definitions.sqlite");
+    initialize_database(&db).unwrap();
+    insert_test_definitions(&Connection::open(&db).unwrap());
+    let port = free_port();
+    let templates = temp.path().join("templates");
+    default_templates(&templates);
+    let config = format!(
+        "{{\n log \"{0}/access.log\"\n error_log \"{0}/error.log\"\n ban_mode true\n honeypot_mode true\n ban_duration \"30s\"\n definitions_db \"{1}\"\n honeypot_templates_dir \"{2}\"\n audit_log \"{0}/audit.ndjson\"\n matched_log \"{0}/matched.log\"\n}}\nprotected.example:{3} {{\n ban_mode false\n proxy http://{4}/\n}}\n",
+        temp.path().display(),
+        db.display(),
+        templates.display(),
+        port,
+        upstream.address,
+    );
+    fs::write(temp.path().join("ferron.conf"), config).unwrap();
+    let child = Command::new(env!("CARGO_BIN_EXE_ferron"))
+        .current_dir(temp.path())
+        .args(["run", "-c", "ferron.conf"])
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .spawn()
+        .unwrap();
+    let audit = temp.path().join("audit.ndjson");
+    let mut process = FerronProcess {
+        child: Some(child),
+        temp,
+        upstream: Some(upstream),
+        listen_port: port,
+        audit,
+    };
+    process.wait_ready();
+
+    // The explicitly configured named host retains its local ban-mode override.
+    assert_eq!(process.request_host("protected.example", "/known").0, 200);
+    assert_eq!(process.upstream_count(), 1);
+    let (status, body) = process.request_host("127.0.0.1", DECOY_PATH);
+    assert_eq!(status, 200, "{}", String::from_utf8_lossy(&body));
+    // Existing ID-leak bans deliberately return Not Found for unrelated paths.
+    assert_eq!(process.request_host("127.0.0.1", "/ordinary").0, 404);
+    assert_eq!(process.request_host("127.0.0.1", "/known").0, 403);
+    assert_eq!(process.upstream_count(), 1);
+
+    process.graceful_shutdown();
+    let matched = fs::read_to_string(process.temp.path().join("matched.log")).unwrap();
+    assert!(matched.contains(&format!("\"{DECOY_NAME}\"")), "{matched}");
+    let audit = fs::read_to_string(&process.audit).unwrap();
+    assert!(audit.contains("/ordinary"), "{audit}");
+}
+
 const DECOY_NAME: &str = "operator-google-decoy";
 const DECOY_PATH: &str = "/operator-credentials";
 
