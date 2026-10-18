@@ -19,12 +19,21 @@ called explicitly; the server itself never modifies the database. When using
 matching responses.
 
 The canonical snapshot contains the latest accumulated rules: secret-file
-decoys and ban-only probes, including the latest snapshot v2 additions. Deploy
+decoys and ban-only probes, including the latest snapshot v3 additions. Deploy
 every matching `honeypot-responses/id-leak-*.yaml` file alongside the database
 (or in the same bundle) before enabling honeypot mode. Common application routes such
 as `/admin`, `/db`, `/login`, `/info.php`, the service-account CA certificate,
 and arbitrary PHP filenames remain unmatched. Restart Ferron after replacing
 the definitions database or bundle.
+
+Snapshot v3 widens existing rules to observed scanner variants: WordPress
+config backups without the `.php` extension, the non-hidden `docker/config.json`,
+lowercase `azureprofile.json` plus `/.azure/credentials`, CI manifests
+(`Jenkinsfile`, GitHub workflow entries, `.travis.yml`, `bitbucket-pipelines.yml`,
+`.circleci/config.yml`, `appveyor.yml`, `.drone.yml`, `.woodpecker.yml`),
+PHPUnit `eval-stdin.php` backup suffixes, bare `/etc/passwd`, and the TBK DVR
+`/device.rsp` endpoint. It adds two new decoys: the gcloud CLI credential store
+and the Symfony parameter configuration.
 
 Snapshot v2 adds honeypot decoys for Azure CLI tokens, GitHub CLI, DigitalOcean,
 OpenStack, rclone, Lambda Cloud, and LiteLLM credentials. It adds narrow
