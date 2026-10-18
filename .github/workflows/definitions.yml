@@ -19,6 +19,7 @@ jobs:
 
       - name: Build definitions database
         run: |
+          mkdir -p zip
           rm -f zip/definitions.sqlite
           sqlite3 -bail zip/definitions.sqlite '.read docs/database/attack-definitions-snapshot-v1.sql'
 
