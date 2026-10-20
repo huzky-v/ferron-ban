@@ -12,6 +12,7 @@ path = "src/main.rs"
 
 [dependencies]
 ferron-abuse-protection = { path = "../ferron-abuse-protection" }
+ferron-text-errors = { path = "../ferron-text-errors" }
 ferron-entrypoint = { git = "https://github.com/ferronweb/ferron.git", rev = "4c332d71545bea7076efc6d93ce4b42620475c43", version = "3.0.0-rc.6", features = ["profile-default"] }
 
 [dev-dependencies]

@@ -1,0 +1,20 @@
+[package]
+name = "ferron-text-errors"
+version = "0.1.0"
+description = "Ferron 3 module serving plain-text error responses derived from the HTTP status code"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+async-trait = "0.1"
+bytes = "1"
+http = "1"
+http-body-util = "0.1.3"
+
+ferron-core = { git = "https://github.com/ferronweb/ferron.git", rev = "4c332d71545bea7076efc6d93ce4b42620475c43", version = "3.0.0-rc.6" }
+ferron-http = { git = "https://github.com/ferronweb/ferron.git", rev = "4c332d71545bea7076efc6d93ce4b42620475c43", version = "3.0.0-rc.6" }
+
+[dev-dependencies]
+rustc-hash = "2"
+tokio = { version = "1", features = ["rt", "macros"] }
