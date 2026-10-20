@@ -11,6 +11,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: attack-definitions-release
+  cancel-in-progress: false
+
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -38,3 +42,4 @@ jobs:
             || gh release create definitions --repo "$GITHUB_REPOSITORY" \
                  --title "Attack definitions" --latest --target "$GITHUB_SHA"
           gh release upload definitions attack-def.zip --clobber --repo "$GITHUB_REPOSITORY"
+          gh release edit definitions --draft=false --latest --repo "$GITHUB_REPOSITORY"
